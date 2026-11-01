@@ -1,0 +1,4 @@
+# LF everywhere, on every checkout: the zip is rebuilt byte for byte from these files.
+* text=auto eol=lf
+*.png binary
+*.ttf binary

@@ -1,0 +1,49 @@
+# Builds the game from this repository on every push. A tag v* also publishes the release: the
+# zip players download is built here, by GitHub, from the tagged source, never uploaded by hand.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # the release
+      id-token: write # the build attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # NW.js is checked against the SHA-256 pinned in build.ts, cached or not.
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: nwjs-v0.29.4-win-x64
+      - run: npm run build -- --windows --zip
+      - name: Checksums
+        working-directory: dist
+        run: |
+          sha256sum ninetranslator-tutorial-windows.zip > SHA256SUMS.txt
+          (cd ninetranslator-tutorial && sha256sum Game.exe) >> SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/ninetranslator-tutorial-windows.zip
+      - if: startsWith(github.ref, 'refs/tags/v')
+        name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { cat .github/release-notes.md; echo '```'; cat dist/SHA256SUMS.txt; echo '```'; } > notes.md
+          gh release create "$GITHUB_REF_NAME" dist/ninetranslator-tutorial-windows.zip dist/SHA256SUMS.txt \
+            --title "Nine and the Forest of Words $GITHUB_REF_NAME" --notes-file notes.md

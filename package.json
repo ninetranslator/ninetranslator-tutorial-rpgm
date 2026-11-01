@@ -1,0 +1,21 @@
+{
+  "name": "ninetranslator-tutorial-rpgm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nine and the Forest of Words: a five-minute RPG Maker MV game in Japanese for trying ninetranslator on",
+  "type": "module",
+  "license": "SEE LICENSE IN README.md",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node --import tsx build.ts",
+    "art": "node --import tsx art/draw.ts",
+    "test": "node --import tsx --test test/game.test.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "fflate": "0.8.3",
+    "tsx": "4.23.12"
+  }
+}

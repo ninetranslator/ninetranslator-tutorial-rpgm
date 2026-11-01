@@ -1,0 +1,4 @@
+node_modules/
+# the build (npm run build) and the NW.js zip it downloads for Game.exe
+dist/
+.cache/
